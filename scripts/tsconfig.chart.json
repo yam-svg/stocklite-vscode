@@ -1,0 +1,12 @@
+{
+  "//": "S3 验收用：并行会话（如 S1 的 src/data）在途代码会污染全量 tsc，这里把类型检查范围限定到 S3 及其依赖。S7 集成后应删除，回归根 tsconfig。",
+  "extends": "../tsconfig.json",
+  "include": [
+    "../src/extension.ts",
+    "../src/shared/**/*.ts",
+    "../src/features/**/*.ts",
+    "../src/ui/watchlist/**/*.ts",
+    "../src/ui/chart/**/*.ts",
+    "./chart.selftest.ts"
+  ]
+}

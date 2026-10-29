@@ -1,0 +1,43 @@
+/* StockLite 图表 webview 样式：全部走 VSCode 主题变量，明暗自适应 */
+html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+body {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+}
+#topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px; flex: none;
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-widget-border, transparent));
+}
+#title { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#periods { display: flex; gap: 4px; }
+#periods button, #refresh {
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#periods button:hover, #refresh:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(127,127,127,.15));
+  color: var(--vscode-foreground);
+}
+#periods button.active {
+  background: var(--vscode-button-secondaryBackground, rgba(127,127,127,.18));
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+}
+#refresh { margin-left: auto; }
+#chart { flex: 1 1 auto; min-height: 0; position: relative; }
+#status {
+  position: absolute; inset: 40px 0 0 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--vscode-descriptionForeground); font-size: 12px;
+  pointer-events: none;
+}
+.hidden { display: none !important; }

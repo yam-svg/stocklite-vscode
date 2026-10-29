@@ -1,0 +1,299 @@
+{
+  "name": "stocklite",
+  "displayName": "StockLite 股票基金行情",
+  "description": "A股/基金/期货/全球指数实时行情、持仓盈亏、买卖点标记与涨跌提醒，常驻 VSCode 状态栏与侧边栏。",
+  "version": "0.0.1",
+  "publisher": "stocklite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stocklite/stocklite-vscode"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "stock",
+    "fund",
+    "行情",
+    "股票",
+    "基金"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "stocklite",
+          "title": "StockLite",
+          "icon": "$(pulse)"
+        }
+      ]
+    },
+    "views": {
+      "stocklite": [
+        {
+          "id": "stocklite.stock",
+          "name": "股票",
+          "type": "webview"
+        },
+        {
+          "id": "stocklite.fund",
+          "name": "基金",
+          "type": "webview",
+          "when": "config.stocklite.tabs.fund"
+        },
+        {
+          "id": "stocklite.future",
+          "name": "期货",
+          "type": "webview",
+          "when": "config.stocklite.tabs.future"
+        },
+        {
+          "id": "stocklite.global",
+          "name": "全球指数",
+          "type": "webview",
+          "when": "config.stocklite.tabs.global"
+        },
+        {
+          "id": "stocklite.sector",
+          "name": "板块",
+          "type": "webview",
+          "when": "config.stocklite.tabs.sector"
+        },
+        {
+          "id": "stocklite.ipo",
+          "name": "新股",
+          "type": "webview",
+          "when": "config.stocklite.tabs.ipo"
+        },
+        {
+          "id": "stocklite.us",
+          "name": "美股",
+          "type": "webview",
+          "when": "config.stocklite.tabs.us"
+        },
+        {
+          "id": "stocklite.crypto",
+          "name": "加密币",
+          "type": "webview",
+          "when": "config.stocklite.tabs.crypto"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "stocklite.viewAdd",
+        "title": "StockLite: 添加自选",
+        "icon": "$(add)"
+      },
+      {
+        "command": "stocklite.viewRefresh",
+        "title": "StockLite: 刷新当前视图",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "stocklite.deleteItem",
+        "title": "StockLite: 删除所选"
+      },
+      {
+        "command": "stocklite.batchImport",
+        "title": "StockLite: 批量导入股票"
+      },
+      {
+        "command": "stocklite.manageGroups",
+        "title": "StockLite: 管理分组"
+      },
+      {
+        "command": "stocklite.exportConfig",
+        "title": "StockLite: 导出配置"
+      },
+      {
+        "command": "stocklite.importConfig",
+        "title": "StockLite: 导入配置"
+      },
+      {
+        "command": "stocklite.openSettings",
+        "title": "StockLite: 打开设置"
+      },
+      {
+        "command": "stocklite.openChart",
+        "title": "StockLite: 查看K线/分时"
+      },
+      {
+        "command": "stocklite.showPnlCalendar",
+        "title": "StockLite: 盈亏日历"
+      },
+      {
+        "command": "stocklite.showTradeHistory",
+        "title": "StockLite: 交易记录"
+      },
+      {
+        "command": "stocklite.setAlert",
+        "title": "StockLite: 设置提醒"
+      },
+      {
+        "command": "stocklite.donate",
+        "title": "StockLite: 支持作者"
+      },
+      {
+        "command": "stocklite.feedback",
+        "title": "StockLite: 意见反馈"
+      },
+      {
+        "command": "stocklite.showOnboarding",
+        "title": "StockLite: 新手指引"
+      },
+      {
+        "command": "stocklite.statusBarClick",
+        "title": "StockLite: 状态栏菜单"
+      },
+      {
+        "command": "stocklite.addFund",
+        "title": "StockLite: 添加基金"
+      },
+      {
+        "command": "stocklite.addFuture",
+        "title": "StockLite: 添加期货"
+      },
+      {
+        "command": "stocklite.addCrypto",
+        "title": "StockLite: 添加加密币"
+      },
+      {
+        "command": "stocklite.addGlobalIndex",
+        "title": "StockLite: 选择显示的全球指数"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "stocklite.viewAdd",
+          "when": "view =~ /^stocklite\\.(stock|fund|future|global|us|crypto)$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "stocklite.viewRefresh",
+          "when": "view =~ /^stocklite\\./",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "stocklite.viewAdd",
+          "when": "false"
+        },
+        {
+          "command": "stocklite.viewRefresh",
+          "when": "false"
+        },
+        {
+          "command": "stocklite.statusBarClick",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "StockLite",
+      "properties": {
+        "stocklite.pollIntervalSeconds": {
+          "type": "number",
+          "default": 5,
+          "minimum": 2,
+          "description": "行情轮询间隔（秒）"
+        },
+        "stocklite.colorUp": {
+          "type": "string",
+          "enum": [
+            "red",
+            "green"
+          ],
+          "default": "red",
+          "description": "涨的颜色（红涨绿跌 / 绿涨红跌）"
+        },
+        "stocklite.tabs.fund": {
+          "type": "boolean",
+          "default": true,
+          "description": "显示“基金”标签页"
+        },
+        "stocklite.tabs.future": {
+          "type": "boolean",
+          "default": true,
+          "description": "显示“期货”标签页"
+        },
+        "stocklite.tabs.global": {
+          "type": "boolean",
+          "default": true,
+          "description": "显示“全球指数”标签页"
+        },
+        "stocklite.tabs.sector": {
+          "type": "boolean",
+          "default": false,
+          "description": "显示“板块”标签页"
+        },
+        "stocklite.tabs.ipo": {
+          "type": "boolean",
+          "default": false,
+          "description": "显示“新股”标签页"
+        },
+        "stocklite.tabs.us": {
+          "type": "boolean",
+          "default": false,
+          "description": "显示“美股”标签页"
+        },
+        "stocklite.tabs.crypto": {
+          "type": "boolean",
+          "default": false,
+          "description": "显示“加密币”标签页"
+        },
+        "stocklite.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "在状态栏显示行情"
+        },
+        "stocklite.statusBar.codes": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "状态栏轮播的行情代码（留空则从自选股/全球指数自动选取）"
+        },
+        "stocklite.indexes.enabledOptional": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "“更多指数”中被用户启用的指数 id（双轨可见性之一）"
+        },
+        "stocklite.indexes.hidden": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "被用户手动隐藏的默认指数 id（双轨可见性之二）"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc --noEmit && node esbuild.mjs",
+    "selftest": "node esbuild-selftest.mjs && node out/selftest.cjs",
+    "watch": "node esbuild.mjs --watch",
+    "vscode:prepublish": "node esbuild.mjs --production"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,50 @@
+/* 盈亏日历 webview 样式（S3）：走势折线 + GitHub 风格月历热图，主题变量自适应 */
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+}
+#topbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px 4px; }
+#topbar .title { font-weight: 600; }
+#topbar select, #topbar button, #calendar button {
+  background: var(--vscode-dropdown-background, transparent);
+  color: var(--vscode-dropdown-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, transparent));
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#topbar select { max-width: 260px; }
+#refresh { margin-left: auto; }
+#summary { padding: 2px 14px 6px; color: var(--vscode-descriptionForeground); font-size: 12px; }
+#summary b { margin: 0 2px; }
+#trend { width: 100%; height: 150px; display: block; }
+#calendar { padding: 4px 14px; }
+#calHead { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+#monthLbl { font-weight: 600; min-width: 84px; text-align: center; }
+#monthSum { margin-left: auto; color: var(--vscode-descriptionForeground); font-size: 12px; }
+#weekRow, #grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+#weekRow { color: var(--vscode-descriptionForeground); font-size: 11px; text-align: center; margin-bottom: 2px; }
+.cell {
+  border-radius: 4px; padding: 3px 5px; min-height: 40px;
+  background: var(--vscode-editor-inactiveSelectionBackground, rgba(127,127,127,.08));
+  border: 1px solid transparent;
+  cursor: default;
+  overflow: hidden;
+}
+.cell.has { cursor: pointer; }
+.cell.has:hover { border-color: var(--vscode-focusBorder, rgba(127,127,127,.5)); }
+.cell.selected { border-color: var(--vscode-focusBorder, rgba(127,127,127,.8)); }
+.cell.blank { background: transparent; }
+.cell .d { font-size: 10px; color: var(--vscode-descriptionForeground); }
+.cell .v { font-size: 11px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#detail { padding: 8px 14px 16px; }
+#detailTitle { color: var(--vscode-descriptionForeground); font-size: 12px; margin-bottom: 4px; }
+#detailTable { width: 100%; border-collapse: collapse; font-size: 12px; }
+#detailTable td, #detailTable th { padding: 3px 6px; text-align: right; border-bottom: 1px solid var(--vscode-editorIndentGuide-background1, rgba(127,127,127,.15)); }
+#detailTable td:first-child, #detailTable th:first-child { text-align: left; }
+#errors { padding: 0 14px 10px; color: var(--vscode-errorForeground); font-size: 11px; white-space: pre-wrap; }
+.hidden { display: none !important; }
