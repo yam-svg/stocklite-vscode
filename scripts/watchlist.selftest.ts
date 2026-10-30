@@ -1,16 +1,19 @@
 /**
  * S2 自测：通用行情表框架 + 自选股纯逻辑（node 直跑，vscode 依赖经桩替换）。
  * 覆盖：批量导入词法解析（Kotlin StockTextParser 对等）、持仓推导与盈亏公式、
- * 三态排序、金额格式化、自选/分组仓库行为、provider 过渡注册。
+ * 三态排序、金额格式化、自选/分组仓库行为、provider 注册表（shared/registry）、
+ * 竞价标注与封单手数列（G1，对照 Kotlin StockPanel/L10n 语义）。
  */
 import { parseStockText, MAX_ENTRIES } from '../src/ui/watchlist/stockTextParser';
 import { derivePosition, realizedPnl, todayPnl, effectivePosition, todayShanghai } from '../src/ui/watchlist/positions';
 import { nextSort, sortRows, sortableValue } from '../src/ui/watchlist/table/sorting';
 import { formatCompact, changePctOf, cellOf } from '../src/ui/watchlist/table/format';
+import { auctionSubOf, priceCellOf, lotsText, sealText, sealCellOf } from '../src/ui/watchlist/stockCells';
+import { STOCK_COLUMNS } from '../src/ui/watchlist/stockTab';
 import type { ColumnDef, Quote, TradeRecord } from '../src/shared/types';
 import { WatchlistStore } from '../src/ui/watchlist/store';
 import type { ConfigStore } from '../src/shared/config';
-import { getProvider, isMock, registerProvider } from '../src/ui/watchlist/providers';
+import { getProvider, isMock, registerProvider } from '../src/shared/registry';
 import { createMockProvider } from '../src/shared/mockProvider';
 
 let passed = 0;
@@ -120,6 +123,50 @@ async function main(): Promise<void> {
     const cellPriceDown = cellOf(priceCol, quote({ price: 9, prevClose: 10 }));
     check('percent 列随自身正负着色', cellUp.text === '+2.00%' && cellUp.dir === 1);
     check('price 列随当日涨跌着色', cellPriceDown.dir === -1);
+  }
+
+  console.log('[auction / sealLots — G1]');
+  {
+    const priceCol = STOCK_COLUMNS.find((c) => c.key === 'price')!;
+    // ① 竞价小字：isAuction=1 → '竞价'
+    check('auctionSubOf: isAuction=1 → 竞价', auctionSubOf(quote({ extra: { isAuction: 1 } })) === '竞价');
+    // ② 无标记（9:25 定格后 / 非 A 股）不带标注
+    check('auctionSubOf: 缺省/0/undefined 不标注',
+      auctionSubOf(quote({})) === undefined &&
+      auctionSubOf(quote({ extra: { isAuction: 0 } })) === undefined &&
+      auctionSubOf(quote({ extra: { sealLots: 12 } })) === undefined);
+    // ③ priceCellOf 有竞价时合并 sub，保留价格文本与着色
+    const auc = priceCellOf(priceCol, quote({ price: 11, prevClose: 10, extra: { isAuction: 1 } }));
+    check('priceCellOf: 竞价行价格文本+dir+sub 齐全', auc.text === '11.00' && auc.dir === 1 && auc.sub === '竞价');
+    // ④ priceCellOf 无竞价时不产生 sub 字段
+    const plain = priceCellOf(priceCol, quote({ price: 9, prevClose: 10 }));
+    check('priceCellOf: 无竞价无 sub', plain.sub === undefined && plain.dir === -1);
+
+    // ⑤ lotsText 缩写：手 → 万/亿（对照 L10n.lotsText）
+    check('lotsText: 三档缩写', lotsText(850) === '850' && lotsText(23000) === '2.3万' && lotsText(123456789) === '1.23亿',
+      `${lotsText(850)}|${lotsText(23000)}|${lotsText(123456789)}`);
+    // ⑥ sealText 正负同文案（符号仅表方向，不进文案）
+    check('sealText: 正负同文案去符号', sealText(23000) === '封2.3万手' && sealText(-23000) === '封2.3万手');
+    // ⑦ sealCellOf 涨停正手数：dir=1
+    const upSeal = sealCellOf(quote({ extra: { sealLots: 23000 } }));
+    check('sealCellOf: 涨停买一封单 dir=+1', upSeal.text === '封2.3万手' && upSeal.dir === 1);
+    // ⑧ sealCellOf 跌停负手数：dir=-1（8500 手不足万位保留原值）
+    const downSeal = sealCellOf(quote({ extra: { sealLots: -8500 } }));
+    check('sealCellOf: 跌停卖一封单 dir=-1', downSeal.text === '封8500手' && downSeal.dir === -1, downSeal.text);
+    // ⑨ 非封板（缺省/0/NaN）占位 '--' 且不着色
+    check('sealCellOf: 非封板 → -- 不着色',
+      sealCellOf(quote({})).text === '--' &&
+      sealCellOf(quote({ extra: { sealLots: 0 } })).text === '--' &&
+      sealCellOf(quote({ extra: { sealLots: Number.NaN } })).dir === undefined);
+    // ⑩ 列装配：封单手数列存在、可排序关闭、紧跟涨跌幅之后
+    const idx = STOCK_COLUMNS.findIndex((c) => c.key === 'sealLots');
+    check('列装配: sealLots 列存在且禁排序、紧随 changePct',
+      idx > 0 && STOCK_COLUMNS[idx].sortable === false && STOCK_COLUMNS[idx - 1].key === 'changePct');
+    // ⑪ 封单文案对排序层的降级：列已禁排序；即便误排序，缺数 '--' 解析 NaN 恒末位，
+    //     封单文案解析为非数值字符串走 localeCompare，不会按错误数量参与数值比较
+    check('封单文案排序降级（--→NaN，封X手→字符串）',
+      typeof sortableValue({ key: 'x', name: 'x', cells: [{ text: sealText(23000) }] }, 0) === 'string' &&
+      Number.isNaN(sortableValue({ key: 'x', name: 'x', cells: [{ text: '--' }] }, 0)));
   }
 
   console.log('[store]');

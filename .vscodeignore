@@ -1,9 +1,22 @@
+# vsce 打包排除清单（S7a）：包内只保留 out/extension.js、webview 全部资产
+# （含 settings/donate/*.png 收款码与 chart/assets/klinecharts.min.js）、README/LICENSE/package.json。
+# 运行时零 npm 依赖（扩展代码 esbuild 全量打包，webview 资产本地引用），node_modules 整目录排除。
 .vscode/**
-src/**
-scripts/**
+.git*
+.idea/**
 docs/**
+scripts/**
+src/**
 node_modules/**
 esbuild*.mjs
-tsconfig.json
+tsconfig*.json
 **/*.map
-.gitignore
+**/*.ts
+**/*.mts
+# 自测产物（out/ 只留 extension.js）
+out/*selftest*.cjs
+out/webview-syntax-check.cjs
+# 会话交付说明与历史包
+*-DELIVERY.md
+*.vsix
+.scratch/**

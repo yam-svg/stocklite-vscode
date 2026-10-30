@@ -7,7 +7,6 @@ import type { EventBus } from '../shared/events';
 import type { QuoteProvider } from '../shared/types';
 import { PollScheduler } from './scheduler';
 import { createDataProviders, probeCryptoStatus, type GlobalVisibility } from './providers';
-import { cnRefreshIntervalMs } from './marketTime';
 import type { BreadthSnapshotStore } from './breadth';
 
 export * from './providers';
@@ -42,9 +41,12 @@ export interface DataDeps {
 }
 
 /**
- * 激活数据层：注册 8 个 provider（广播 providerRegistered），并按交易时段启动轮询。
- * 间隔策略：stock/fund/future 走 A 股时段感知（开市基准/收市 60s）；
- * global/sector/ipo/us/crypto 恒为基准间隔（各自内部另有 StaleCache/60s 缓存控流量）。
+ * 激活数据层：注册 8 个 provider（广播 providerRegistered）+ 加密连通首探测。
+ * **轮询由 tab 侧自持（S7b 定案，勿轻易改回）**：stockTab（S2）与 SimpleQuoteTab（S6）
+ * 各自按 Kotlin 面板同档节奏 fetch 并按 tabId 广播 quotesUpdated，且持有页面私有态
+ * （基金净值行/加密连通上报/全球限频标记）；若再启动调度器任务，同一批 codes 会被
+ * 双倍请求（push2 本就按连接速率限流，双倍尤其有害）。PollScheduler 保留构造与
+ * refreshNow 路由（无任务时自然落空），其 in-flight 合并/退避能力留作日后集中化备选。
  */
 export function activateData(deps: DataDeps): { scheduler: PollScheduler } {
   const providers = createDataProviders(deps.getGlobalVisibility);
@@ -54,28 +56,6 @@ export function activateData(deps: DataDeps): { scheduler: PollScheduler } {
   }
 
   const scheduler = new PollScheduler(deps.bus);
-  const baseMs = () => Math.max(2, deps.pollIntervalSeconds?.() ?? 5) * 1000;
-  const tabs: { id: string; intervalMs: () => number }[] = [
-    { id: 'stock', intervalMs: () => cnRefreshIntervalMs(Date.now()) },
-    { id: 'fund', intervalMs: () => cnRefreshIntervalMs(Date.now()) },
-    { id: 'future', intervalMs: () => cnRefreshIntervalMs(Date.now()) },
-    { id: 'global', intervalMs: () => Math.max(baseMs(), 15_000) },
-    { id: 'sector', intervalMs: () => Math.max(baseMs(), 60_000) },
-    { id: 'ipo', intervalMs: () => 5 * 60_000 },
-    { id: 'us', intervalMs: () => Math.max(baseMs(), 30_000) },
-    { id: 'crypto', intervalMs: () => baseMs() },
-  ];
-  for (const tab of tabs) {
-    const provider = providers[tab.id];
-    if (!provider) continue;
-    scheduler.start({
-      tabId: tab.id,
-      provider,
-      getCodes: () => deps.getTabCodes(tab.id),
-      intervalMs: tab.intervalMs,
-      enabled: tab.id === 'stock' ? undefined : () => deps.isTabEnabled?.(tab.id) ?? false,
-    });
-  }
   // 加密 tab 打开但自选为空时仍要出连通性徽章（Kotlin 首进探测）
   void probeCryptoStatus().catch(() => undefined);
 

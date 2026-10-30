@@ -1,18 +1,17 @@
 /**
- * 图表数据源解析（S3 本地垫片）。
- * 契约只有 providerRegistered 事件（不带实例），暂无按 id 取 Provider 的通道——
- * 已在 docs/contract-changes.md 提案共享注册表；S7 集成时调用 setChartDataProvider() 注入真实 Provider。
- * 在此之前图表一律走 mockProvider，保证 S3 可独立开发验收。
+ * 图表数据源解析：默认直取共享注册表的 stock provider
+ * （日K/周K/月K/分时在 8 个 provider 间共用同一实现、按代码前缀路由，S7a 由过渡垫片切换而来）。
+ * 未注册时注册表回落 mock，保证独立开发可跑；装配方仍可经 setChartDataProvider 显式覆盖。
  */
 import type { QuoteProvider } from '../../shared/types';
-import { createMockProvider } from '../../shared/mockProvider';
+import { getProvider } from '../../shared/registry';
 
-let provider: QuoteProvider = createMockProvider('chart');
+let injected: QuoteProvider | undefined;
 
 export function setChartDataProvider(p: QuoteProvider): void {
-  provider = p;
+  injected = p;
 }
 
 export function getChartDataProvider(): QuoteProvider {
-  return provider;
+  return injected ?? getProvider('stock');
 }

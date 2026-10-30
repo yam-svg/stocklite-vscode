@@ -1,50 +1,57 @@
-# StockLite for VS Code
+# StockLite — 股票基金行情
 
-A股/基金/期货/全球指数实时行情、持仓盈亏、买卖点标记与涨跌提醒，常驻 VSCode 状态栏与侧边栏。
+**Stock & fund quotes, positions ledger, K-line charts and price alerts inside VS Code — write code, watch the market, never leave the editor.**
 
-> 开发中。本工程由 JetBrains 插件 StockLite 移植而来，
-> 总计划与并行会话分工见 ../stocklite-plugin/docs/vscode-port-plan.md。
+A 股 / 基金 / 期货 / 加密货币实时行情 · 全球 37 大指数 · 美股板块 · A 股板块与新股 · 持仓账本与盈亏日历 · 买卖点标记 · 涨跌提醒常驻状态栏。免费、无广告、无需注册账号。与姊妹插件 [StockLite for JetBrains](https://plugins.jetbrains.com/plugin/32115-stocklite) 共享同一套数据逻辑与持仓系统理念，配置可在两个 IDE 间导入导出迁移。
 
-## 开发
+## 它和"行情插件"有什么不同
+
+- **不止看价格，还能记账** —— 交易记录（买入 / 卖出）、持仓成本与市值、今日盈亏、浮动盈亏、累计收益率；盈亏日历按月热图呈现每日盈亏，点任意一天展开当日各股明细。多数插件只是报价器，StockLite 是一套持仓系统。
+- **买卖点直接画在图上** —— 日 K / 周 K / 月 K 自动按交易记录标注每笔成交（B / S 标记），日内分时同步标注当日交易，悬浮可见日期、价格与数量。
+- **盯盘细节拉满** —— 到价 / 涨跌幅提醒、涨停封单锐减提醒（开板 / 翘板信号，含大单抽单断崖识别）、大盘涨跌家数异动提醒，全部经 IDE 通知与状态栏图标送达。
+- **为程序员准备** —— 侧边栏原生视图 + 状态栏常驻；自选股粘贴文本批量导入；配置 JSON 一键导入导出（兼容 JetBrains 版备份）；红涨绿跌 / 绿涨红跌配色可切换。
+
+## 行情面板（8 个标签页，除股票外均可在设置中开关）
+
+- **股票**：沪深北 A 股实时行情；填成本价与数量自动算市值 / 今日盈亏 / 浮动盈亏 / 累计收益率；自定义分组、三态排序、拖拽排序。批量导入：粘贴一段自选股文本（名称、6 位代码、sh/sz/bj/hk 前缀、.SZ/.SS 后缀混排）自动解析校验、勾选分组、重复自动去重。
+- **基金**：东方财富官方净值与涨跌幅，净值日期一目了然；填份额自动算今日盈亏与累计盈亏；右键查看季度持仓明细。
+- **期货**：国内 / 国际期货同板显示；安装后内置纳斯达克 100（E-mini NQ）与布伦特原油两大常用外盘合约，开箱即看。
+- **加密货币**：BTC / ETH 等 2000+ USDT 交易对 7×24 行情；Bitget → Gate.io → Binance 镜像三源自动降级；网络不可达时明确提示，其它面板不受影响；内置主流币开箱即看。
+- **全球指数**：沪深创 / 恒指 / 恒生科技 / 标普 / 道指 / 纳指 / 纳指 100 / VIX / 德法英日韩等 20 个常用指数，另附 17 个「更多指数」——显示哪些在设置中自由勾选。
+- **盘前研判（全球页顶部）**：盘后「市场天气」六因子情绪分（涨跌家数 / 涨停 / 跌停 / 连板高度 / 封板率 / 量能环比），交易日 8:40 出初版、9:15 并入韩日早盘出终版（A50 期货 / 纳指隔夜 / T-1 极值 / 人民币汇率），开盘后自动结算，跳空与全天方向双账本记录历史命中率。可在设置关闭。
+- **美股板块**：33 只行业与主题 ETF（半导体、AI、新能源、黄金……），交易时段自动展示盘前 / 盘后延伸行情。
+- **A 股板块**：行业 / 概念板块全市场涨跌榜（东财分页防限流，60 秒轮询自动补全）。
+- **新股**：新股申购与次新表现一屏只读速览。
+
+## 图表与提醒
+
+- 点击任意行展开 K 线面板（klinecharts 真蜡烛图）：日内 / 日 K / 周 K / 月 K，A 股日线前复权。
+- 盈亏日历：月历热图看每日盈亏，配色跟随全局涨跌方案。
+- 状态栏行情轮播：悬浮看明细，点击直达图表 / 提醒 / 设置。
+- 提醒引擎：到价 / 涨跌幅边沿触发（不重复轰炸）、封单锐减（涨停开板警惕 / 跌停翘板机会）、涨跌家数 10 分钟内急转异动。
+
+## 数据与声明
+
+行情来自新浪 / 腾讯 / 东方财富 / Yahoo Finance / Bitget / Gate.io 等公开接口；A 股与港股为实时，美股等海外行情有延迟（面板内已标注）。所有数据仅供个人参考，本扩展不构成任何投资建议。
+
+插件永久免费、无广告、不收集任何个人信息（反馈功能为可选提交）。认可价值的话，设置页有微信 / 支付宝赞赏入口。
+
+---
+
+## 开发者
 
 ```bash
 npm install
-npm run compile   # 类型检查 + 打包
-npm run selftest  # 契约层自测（不依赖 vscode）
+npm run compile        # tsc --noEmit + esbuild 打包
+npm run selftest:all   # 八组自测（契约/数据/自选/图表/提醒/设置/tabs/研判）
+STOCKLITE_ONLINE=1 npm run selftest:data   # 数据层在线抽查（真实接口；勿连跑，push2 会限流）
 ```
 
-F5 启动“扩展开发宿主”查看侧边栏 StockLite 图标（当前为 S0 占位视图）。
+F5 启动「扩展开发宿主」调试；发布 `npx @vscode/vsce package`。移植背景与并行会话分工见 JetBrains 仓库 `docs/vscode-port-plan.md`。
 
-## 目录所有权（并行开发铁律）
+---
 
-| 目录 | 归属 |
-|---|---|
-| `src/shared/`、`package.json`、`src/extension.ts` | S0 冻结，改动走 docs/contract-changes.md |
-| `src/data/` | S1 数据源 |
-| `src/ui/watchlist/` | S2 通用行情表 + 自选股 |
-| `src/ui/chart/` | S3 K线/分时/盈亏日历 |
-| `src/features/statusbar/` `src/features/alerts/` | S4 |
-| `src/features/settings/` | S5 |
-| `src/features/tabs/` | S6 可选 tab |
+## 相关链接
 
-## S1 数据源层（已交付）
-
-`src/data/` 为移植自 Kotlin MarketDataService/ChartDataService 的纯 TS 数据层（不 import vscode），
-含 8 个 provider（stock/fund/future/global/sector/ipo/us/crypto）、交易时段感知轮询调度器
-`PollScheduler`（开市 5s/收市 60s、in-flight 合并、失败退避封顶 5 分钟）、37 条全球指数双轨可见性、
-大盘涨跌家数/涨停生态/离岸人民币概览与 A 股搜索、导入校验、财报日期。
-
-自测：
-
-```bash
-npm run compile                                   # 零错误
-node scripts/data-selftest.mjs && node out/data-selftest.cjs   # 离线 116 项
-STOCKLITE_ONLINE=1 node out/data-selftest.cjs                   # 追加在线 23 项（真实接口）
-```
-
-F5 手动验收（S1 无 UI，验证装配点即可）：
-
-1. F5 起扩展开发宿主（当前仍是 S0 占位视图，属预期）。
-2. 宿主终端里跑 `STOCKLITE_ONLINE=1 node out/data-selftest.cjs`，确认在线 23 项全绿；
-   若"板块行业榜"偶发失败，是东财 push2 随机断连（既定坑），重跑或等 60s 轮询补全即可。
-3. 真正的装配验收待 S7 在 extension.ts 接 `activateData` 后进行（接线需求见 docs/contract-changes.md S1 段）。
+- 源码仓库：<https://github.com/yam-svg/stocklite-vscode>
+- 问题反馈：<https://github.com/yam-svg/stocklite-vscode/issues>（或直接在插件设置页使用「意见反馈」）

@@ -10,7 +10,10 @@ import type { FeatureDeps } from '../../extension';
 import { SettingsKeys, StateKeys } from '../../shared/config';
 import type { Quote } from '../../shared/types';
 import { formatPrice, formatPct, pctOf, statusText, tooltipLines, trendOf } from './format';
-import { resolveStockProvider } from './providerRef';
+import { getProvider } from '../../shared/registry';
+
+/** 股票行情一律取自共享注册表（S1 真实 provider 注册后自动接管，未注册回落 mock） */
+const resolveStockProvider = () => getProvider('stock');
 
 const MAX_AUTO_CODES = 8;
 

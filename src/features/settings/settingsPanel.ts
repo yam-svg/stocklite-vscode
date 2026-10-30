@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { randomBytes } from 'crypto';
 import { existsSync } from 'fs';
 import type { FeatureDeps } from '../../extension';
+import { StateKeys } from '../../shared/config';
 import { FeedbackClient, type FeedbackItem } from './feedbackApi';
 import { GLOBAL_INDEXES, DEFAULT_INDEXES, OPTIONAL_INDEXES } from './indexCatalog';
 import { openDonatePanel } from './donatePanel';
@@ -17,9 +18,9 @@ import { runExportConfig, runImportConfig } from './configCommands';
 const TAB_KEYS = ['fund', 'future', 'global', 'sector', 'ipo', 'us', 'crypto'] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
-/** 反馈 device id / 邮箱的 globalState 键（键名与 JetBrains 版 StockliteState 字段对齐；S7 建议上收 StateKeys） */
-const FEEDBACK_DEVICE_KEY = 'feedbackDeviceId';
-const FEEDBACK_EMAIL_KEY = 'feedbackEmail';
+/** 反馈 device id / 邮箱的 globalState 键（S7a 已上收 StateKeys，键名与 JetBrains 版 StockliteState 字段对齐） */
+const FEEDBACK_DEVICE_KEY = StateKeys.feedbackDeviceId;
+const FEEDBACK_EMAIL_KEY = StateKeys.feedbackEmail;
 
 interface StateSnapshot {
   pollIntervalSeconds: number;

@@ -13,16 +13,21 @@ import { nextSort, sortRows } from './table/sorting';
 import type { RowAction, RowVM, SortVM, TableSnapshot, ToolbarCommand } from './table/types';
 import { TableTab } from './table/framework';
 import { WatchlistStore } from './store';
-import { getProvider, isMock } from './providers';
+import { getProvider, isMock } from '../../shared/registry';
 import { parseStockText } from './stockTextParser';
 import { effectivePosition, holdingsPnl, todayPnl, todayShanghai } from './positions';
 import { looksLikeCode, promptNumber, promptText, validateDate } from './quickInputs';
+import { priceCellOf, sealCellOf } from './stockCells';
 
-const STOCK_COLUMNS: ColumnDef[] = [
+// 导出供自测断言列装配（封单手数列位置/排序策略）
+export const STOCK_COLUMNS: ColumnDef[] = [
   { key: 'code', title: '代码', kind: 'text', width: 66, align: 'left', sortable: true },
   { key: 'name', title: '名称', kind: 'text', width: 84, align: 'left', sortable: true },
   { key: 'price', title: '现价', kind: 'price', width: 62 },
   { key: 'changePct', title: '涨跌幅', kind: 'percent', width: 62 },
+  // 封单手数：仅涨跌停封板时有值（G1，格式对照 JetBrains 1.18.0 StockPanel）；
+  // 文案"封2.3万手"非纯数值，sortableValue 反解不了，列排序显式关闭
+  { key: 'sealLots', title: '封单手数', kind: 'number', width: 74, sortable: false },
   { key: 'todayPnl', title: '今日盈亏', kind: 'number', width: 72 },
   { key: 'pnl', title: '盈亏', kind: 'number', width: 72 },
   { key: 'cost', title: '成本', kind: 'price', width: 58 },
@@ -143,6 +148,11 @@ export class StockTab {
           return pos.quantity > 0 && pos.cost > 0 ? { text: formatNumber(pos.cost, priceDigitsOf(pos.cost)) } : { text: '--' };
         case 'qty':
           return pos.quantity > 0 ? { text: formatNumber(pos.quantity, 0) } : { text: '--' };
+        case 'price':
+          // 现价 + 集合竞价小字（数据层仅 9:15–9:25 打标记，时机判据勿在此重复）
+          return priceCellOf(col, quote);
+        case 'sealLots':
+          return sealCellOf(quote);
         default:
           return cellOf(col, quote);
       }

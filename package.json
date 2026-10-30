@@ -2,11 +2,15 @@
   "name": "stocklite",
   "displayName": "StockLite 股票基金行情",
   "description": "A股/基金/期货/全球指数实时行情、持仓盈亏、买卖点标记与涨跌提醒，常驻 VSCode 状态栏与侧边栏。",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "stocklite",
+  "icon": "resources/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stocklite/stocklite-vscode"
+    "url": "https://github.com/yam-svg/stocklite-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yam-svg/stocklite-vscode/issues"
   },
   "license": "MIT",
   "engines": {
@@ -257,6 +261,11 @@
           "default": true,
           "description": "在状态栏显示行情"
         },
+        "stocklite.forecast.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "全球指数页顶部显示盘前研判卡与市场天气卡（交易日 8:40/9:15 生成，开盘后自动结算胜率）"
+        },
         "stocklite.statusBar.codes": {
           "type": "array",
           "default": [],
@@ -287,6 +296,14 @@
   "scripts": {
     "compile": "tsc --noEmit && node esbuild.mjs",
     "selftest": "node esbuild-selftest.mjs && node out/selftest.cjs",
+    "selftest:data": "node scripts/data-selftest.mjs && node out/data-selftest.cjs",
+    "selftest:watchlist": "node scripts/watchlist-selftest.mjs && node out/watchlist-selftest.cjs",
+    "selftest:chart": "node scripts/chart.selftest.mjs",
+    "selftest:alerts": "node scripts/alerts-selftest.mjs && node out/alerts.selftest.cjs",
+    "selftest:settings": "node scripts/settings-selftest.mjs && node out/settings.selftest.cjs",
+    "selftest:tabs": "node scripts/tabs-selftest.mjs && node out/tabs-selftest.cjs",
+    "selftest:forecast": "node scripts/forecast-selftest.mjs && node out/forecast-selftest.cjs",
+    "selftest:all": "npm run selftest && npm run selftest:data && npm run selftest:watchlist && npm run selftest:chart && npm run selftest:alerts && npm run selftest:settings && npm run selftest:tabs && npm run selftest:forecast",
     "watch": "node esbuild.mjs --watch",
     "vscode:prepublish": "node esbuild.mjs --production"
   },
@@ -294,6 +311,7 @@
     "@types/node": "^20.14.0",
     "@types/vscode": "^1.85.0",
     "esbuild": "^0.24.0",
+    "klinecharts": "^9.8.12",
     "typescript": "^5.6.0"
   }
 }

@@ -10,12 +10,10 @@
  */
 import type { AlertType, Quote, StockAlert } from '../../shared/types';
 
-/** 扩展提醒类型：sealShrink/breadthJump 为全局系统规则，与到价提醒同存 StateKeys.alerts。
- * 契约的 StockAlert.type 只有 4 个到价类型，这里 Omit 后放宽（正式方案见 docs/contract-changes.md）。 */
-export type ExtendedAlertType = AlertType | 'sealShrink' | 'breadthJump';
-export interface ExtendedStockAlert extends Omit<StockAlert, 'type'> {
-  type: ExtendedAlertType;
-}
+/** sealShrink/breadthJump 为全局系统规则，与到价提醒同存 StateKeys.alerts。
+ * S7a 已把两个类型正式化进契约 AlertType，Extended* 为兼容别名（既有引用面不变）。 */
+export type ExtendedAlertType = AlertType;
+export type ExtendedStockAlert = StockAlert;
 
 export const SYSTEM_RULE_IDS = { sealShrink: 'sys:sealShrink', breadthJump: 'sys:breadthJump' } as const;
 

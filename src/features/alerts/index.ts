@@ -12,7 +12,7 @@ import { randomUUID } from 'crypto';
 import type { FeatureDeps } from '../../extension';
 import { StateKeys } from '../../shared/config';
 import { httpGetJson } from '../../shared/http';
-import type { Quote, StockAlert } from '../../shared/types';
+import type { Quote } from '../../shared/types';
 import {
   BreadthJumpDetector,
   RuleEvaluator,
@@ -27,10 +27,10 @@ import {
   type ExtendedAlertType,
   type SealEvent,
 } from './engine';
-import { resolveStockProvider } from './providerRef';
+import { getProvider } from '../../shared/registry';
 
-/** 扩展规则降级为契约 StockAlert 后广播（S7 把 ExtendedAlertType 正式化后可删） */
-const asContract = (a: ExtendedStockAlert): StockAlert => ({ ...a }) as StockAlert;
+/** 股票行情一律取自共享注册表（S1 真实 provider 注册后自动接管，未注册回落 mock） */
+const resolveStockProvider = () => getProvider('stock');
 
 export function activateAlerts(deps: FeatureDeps): void {
   const { context, bus, config } = deps;
@@ -98,7 +98,7 @@ export function activateAlerts(deps: FeatureDeps): void {
       `${quote.name}(${quote.code}) 现价 ${quote.price.toFixed(2)}（${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%），${thresholdLabel(alert)}`,
       isDown, quote.code, quote.name);
     showFlash(`${quote.name} ${thresholdLabel(alert)}`, isDown);
-    bus.emit('alertFired', { alert: asContract(alert), quote });
+    bus.emit('alertFired', { alert, quote });
     saveAlerts(loadAlerts().map((a) => (a.id === alert.id ? { ...a, lastFiredAt: alert.lastFiredAt } : a)));
   };
 
@@ -141,10 +141,10 @@ export function activateAlerts(deps: FeatureDeps): void {
     notify(`StockLite 封单预警${ev.cliff ? '（断崖抽单）' : ''}`, msg, true, ev.code, ev.name);
     showFlash(`${ev.name} 封单锐减${ev.pct}%`, true);
     bus.emit('alertFired', {
-      alert: asContract(ruleOf(SYSTEM_RULE_IDS.sealShrink) ?? {
+      alert: ruleOf(SYSTEM_RULE_IDS.sealShrink) ?? {
         id: SYSTEM_RULE_IDS.sealShrink, code: ev.code, name: ev.name,
         type: 'sealShrink', threshold: 0, enabled: true,
-      }),
+      },
       quote: { code: ev.code, name: ev.name, price: 0, prevClose: 0, extra: { sealBaseLots: ev.baseLots, sealCurLots: ev.curLots } },
     });
   };
@@ -179,10 +179,10 @@ export function activateAlerts(deps: FeatureDeps): void {
             notify('StockLite 大盘异动', msg, jump.dir === 'down');
             showFlash(`大盘宽度异动（${jump.dir === 'up' ? '走强' : '恶化'}）`, jump.dir === 'down');
             bus.emit('alertFired', {
-              alert: asContract(ruleOf(SYSTEM_RULE_IDS.breadthJump) ?? {
+              alert: ruleOf(SYSTEM_RULE_IDS.breadthJump) ?? {
                 id: SYSTEM_RULE_IDS.breadthJump, code: 'market', name: 'A股大盘',
                 type: 'breadthJump', threshold: 0, enabled: true,
-              }),
+              },
               quote: { code: 'market', name: 'A股大盘', price: jump.toDiff, prevClose: jump.fromDiff },
             });
           }

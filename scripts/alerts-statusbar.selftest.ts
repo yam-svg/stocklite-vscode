@@ -1,7 +1,7 @@
 /**
  * S4 自测：提醒引擎 + 状态栏格式化（node 直跑，不依赖 vscode 运行时）。
  * 运行：npx esbuild scripts/alerts-statusbar.selftest.ts --bundle --platform=node --format=cjs --outfile=out/s4-selftest.cjs && node out/s4-selftest.cjs
- * 注意：只允许 import 不依赖 vscode 的模块（engine / format / providerRef）。
+ * 注意：只允许 import 不依赖 vscode 的模块（engine / format / shared registry）。
  */
 import {
   BreadthJumpDetector,
@@ -12,7 +12,7 @@ import {
   type BreadthSample,
   type ExtendedStockAlert,
 } from '../src/features/alerts/engine';
-import { bindStockProvider, resolveStockProvider } from '../src/features/alerts/providerRef';
+import { getProvider, registerProvider } from '../src/shared/registry';
 import { formatPct, formatPrice, statusText, tooltipLines, trendOf } from '../src/features/statusbar/format';
 import type { Quote } from '../src/shared/types';
 
@@ -241,14 +241,12 @@ async function main(): Promise<void> {
     check('tooltip 含成交额与时间', tip.some((l) => l.includes('2.30 亿')) && tip.some((l) => l.includes('14:59')));
   }
 
-  console.log('[providerRef 垫片]');
+  console.log('[registry 注册表]');
   {
-    const before = resolveStockProvider();
-    check('未绑定回落 mockProvider', before.id === 'mock:stock');
-    const fake = { ...before, id: 'real:stock' };
-    bindStockProvider(fake);
-    check('绑定后返回注入 provider', resolveStockProvider().id === 'real:stock');
-    bindStockProvider(before);
+    check('未注册回落 mockProvider', getProvider('stock').id === 'mock:stock');
+    const fake = { ...getProvider('stock'), id: 'stock' }; // 注册表按 provider.id 归槽
+    registerProvider(fake);
+    check('注册后返回注入 provider', getProvider('stock') === fake);
   }
 
   console.log(`\n结果: ${passed} 通过, ${failed} 失败`);

@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import type { FeatureDeps } from '../../extension';
 import { StateKeys } from '../../shared/config';
 import { buildExportJson, parseImportJson } from './portableConfig';
+import { CRYPTO_SEEDED_KEY, FUTURES_SEEDED_KEY, US_ETF_LIST_KEY } from '../tabs/store';
 
 /** 导出时读取的 contributes.configuration 键（点分路径） */
 const EXPORTED_SETTINGS = [
@@ -17,11 +18,12 @@ const EXPORTED_SETTINGS = [
   'indexes.enabledOptional', 'indexes.hidden',
 ] as const;
 
-/** StateKeys 之外还要随配置带走的 globalState 裸键（见 docs/contract-changes.md S2/S5 小节） */
+/** StateKeys 之外还要随配置带走的 globalState 裸键（feedbackDeviceId/feedbackEmail 已于 S7a 转正进 StateKeys，随 StateKeys 自动导出） */
 const EXTRA_STATE_KEYS = [
   'watchlistDefaultsSeeded', // S2 播种判据，缺失会导致迁移后被重新播种
-  'feedbackDeviceId',        // 反馈回复凭据，丢了查不到自己的回复
-  'feedbackEmail',
+  FUTURES_SEEDED_KEY, // S6：期货/加密播种判据缺失同样会重复播种；美股 ETF 清单丢失会回退全显 33 只
+  CRYPTO_SEEDED_KEY,
+  US_ETF_LIST_KEY,
 ] as const;
 
 export async function runExportConfig(deps: FeatureDeps): Promise<void> {

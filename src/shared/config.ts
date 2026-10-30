@@ -24,6 +24,10 @@ export const StateKeys = {
   selectedGlobalIndexes: 'selectedGlobalIndexes',
   /** 首启引导是否已展示。判据用本键是否已写入，勿用“数据为空”（播种也会写数据） */
   onboarded: 'onboarded',
+  /** 反馈匿名设备号（S7a 自 S5 裸键上收；键名与 JetBrains 版 StockliteState 字段对齐） */
+  feedbackDeviceId: 'feedbackDeviceId',
+  /** 反馈邮箱持久化（同上，用户填写后随配置导出） */
+  feedbackEmail: 'feedbackEmail',
 } as const;
 
 export const SettingsKeys = {

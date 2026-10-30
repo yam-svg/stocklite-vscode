@@ -102,7 +102,11 @@ export interface Position {
   quantity: number;
 }
 
-export type AlertType = 'priceAbove' | 'priceBelow' | 'changeAbove' | 'changeBelow';
+/**
+ * 前四项为标的级到价/涨跌幅提醒；sealShrink（封单锐减）与 breadthJump（大盘宽度异动）
+ * 为全局系统规则（同存 StateKeys.alerts，id 用 sys: 前缀），S7a 自 S4 本地放宽正式化。
+ */
+export type AlertType = 'priceAbove' | 'priceBelow' | 'changeAbove' | 'changeBelow' | 'sealShrink' | 'breadthJump';
 
 export interface StockAlert {
   id: string;
